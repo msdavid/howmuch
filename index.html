@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <title>How Much</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+            background-color: #e0e0e0;
+            color: #000;
+            min-height: 100vh;
+            min-height: 100dvh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 0;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 400px;
+            height: 100vh;
+            height: 100dvh;
+            max-height: 850px;
+            background-color: #fafafa;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+
+        @media (max-width: 400px) {
+            .app-container {
+                max-width: 100%;
+                height: 100vh;
+                height: 100dvh;
+                max-height: none;
+                box-shadow: none;
+            }
+        }
+
+        .app-bar {
+            background-color: #ff9800;
+            color: white;
+            padding: 12px 16px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            flex-shrink: 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .app-bar h1 {
+            font-size: 18px;
+            font-weight: 500;
+            margin: 0;
+        }
+
+        .help-link {
+            color: white;
+            text-decoration: none;
+            font-size: 14px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+
+        .help-link:hover {
+            background-color: rgba(255,255,255,0.2);
+        }
+
+        .content {
+            flex: 1;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .input-section {
+            padding: 12px 16px;
+            flex-shrink: 0;
+        }
+
+        .input-group {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            background-color: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            padding: 5px;
+        }
+
+        .salary-input-group {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            background-color: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            padding: 5px;
+            gap: 8px;
+        }
+
+        .salary-dropdown {
+            flex: 1;
+            padding: 8px;
+            font-size: 14px;
+            color: #333;
+            border: none;
+            background-color: transparent;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .fixed-label {
+            font-size: 14px;
+            color: #333;
+            white-space: nowrap;
+        }
+
+        .input-label {
+            flex: 7;
+            padding: 8px;
+            font-size: 14px;
+            color: #333;
+        }
+
+        .input-field {
+            width: 90px;
+            flex: none;
+            padding: 8px;
+            font-size: 20px;
+            border: none;
+            text-align: right;
+            outline: none;
+            background-color: transparent;
+        }
+
+        .input-field:focus {
+            background-color: #f5f5f5;
+        }
+
+        .divider {
+            height: 1px;
+            background-color: #e0e0e0;
+            margin: 0 16px;
+            flex-shrink: 0;
+        }
+
+        .results-section {
+            padding: 0 16px 10px 16px;
+            flex: 1 1 0;
+            overflow-y: auto;
+            min-height: 0;
+        }
+
+        .result-card {
+            background-color: white;
+            margin-bottom: 1px;
+            padding: 10px 16px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .result-card:hover {
+            background-color: #f5f5f5;
+        }
+
+        .result-card:active {
+            background-color: #eeeeee;
+        }
+
+        .result-title {
+            font-size: 16px;
+            color: #333;
+            margin-bottom: 2px;
+        }
+
+        .result-amount {
+            font-size: 20px;
+            color: #db5d00;
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+
+        .result-formula {
+            font-size: 9px;
+            color: #666;
+            line-height: 1.2;
+        }
+
+        .disclaimer {
+            padding: 10px 16px;
+            text-align: center;
+            flex-shrink: 0;
+            background-color: #f5f5f5;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .disclaimer-text {
+            font-size: 9px;
+            color: #666;
+            line-height: 1.3;
+            margin: 0;
+            display: block;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 1000;
+            padding: 20px;
+        }
+
+        .modal-content {
+            background-color: white;
+            border-radius: 4px;
+            max-width: 400px;
+            margin: 50px auto;
+            padding: 0;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .modal-header {
+            padding: 20px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .modal-title {
+            font-size: 20px;
+            font-weight: 500;
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        .modal-text {
+            font-size: 16px;
+            color: #333;
+            line-height: 1.5;
+            margin-bottom: 15px;
+        }
+
+        .modal-link {
+            color: #ff9800;
+            text-decoration: none;
+            font-size: 16px;
+        }
+
+        .modal-footer {
+            padding: 8px;
+            text-align: right;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .modal-button {
+            background: none;
+            border: none;
+            color: #ff9800;
+            padding: 8px 16px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            text-transform: uppercase;
+        }
+
+        .modal-button:hover {
+            background-color: #fff3e0;
+            border-radius: 4px;
+        }
+
+        @media (max-width: 600px) {
+            .modal-content {
+                margin: 20px auto;
+            }
+        }
+
+        @media (max-height: 700px) {
+            .app-bar {
+                padding: 10px 16px;
+            }
+            .app-bar h1 {
+                font-size: 16px;
+            }
+            .input-section {
+                padding: 10px 16px;
+            }
+            .input-group {
+                margin-bottom: 8px;
+            }
+            .input-label {
+                font-size: 13px;
+                padding: 6px;
+            }
+            .input-field {
+                font-size: 18px;
+                padding: 6px;
+            }
+            .result-card {
+                padding: 8px 16px;
+            }
+            .result-title {
+                font-size: 14px;
+            }
+            .result-amount {
+                font-size: 18px;
+                margin-bottom: 2px;
+            }
+            .result-formula {
+                font-size: 8px;
+            }
+            .disclaimer {
+                padding: 6px 10px;
+            }
+            .disclaimer-text {
+                font-size: 8px;
+                line-height: 1.2;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <div class="app-bar">
+            <h1>How Much</h1>
+            <a href="#" class="help-link" onclick="showHelp(); return false;">Help</a>
+        </div>
+
+        <div class="content">
+        <div class="input-section">
+            <div class="salary-input-group">
+                <select class="salary-dropdown" id="salaryType">
+                    <option value="monthly">Basic monthly salary</option>
+                    <option value="hourly">Basic hourly salary</option>
+                </select>
+                <input type="text" 
+                       class="input-field" 
+                       id="salaryInput" 
+                       placeholder="0" 
+                       inputmode="decimal"
+                       pattern="[0-9]*\.?[0-9]*"
+                       maxlength="7">
+            </div>
+            <div class="input-group">
+                <label class="input-label">Days per Week</label>
+                <input type="text" 
+                       class="input-field" 
+                       id="daysInput" 
+                       value="5.5" 
+                       inputmode="decimal"
+                       pattern="[0-9]*\.?[0-9]*"
+                       maxlength="7">
+            </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="results-section">
+            <div class="result-card" onclick="showLaw('dailyRate')">
+                <div class="result-title">Daily rate</div>
+                <div class="result-amount" id="dailyAmount">$0.00</div>
+                <div class="result-formula" id="dailyFormula">(0.00 x 12 month) / (52 weeks x 5.50 days)</div>
+            </div>
+
+            <div class="result-card" onclick="showLaw('hourlyRate')">
+                <div class="result-title" id="hourlyTitle">Hourly rate</div>
+                <div class="result-amount" id="hourlyAmount">$0.00</div>
+                <div class="result-formula" id="hourlyFormula">(0.00 x 12 month) / (52 weeks x 44 hours)</div>
+            </div>
+
+            <div class="result-card" onclick="showLaw('overtimeRate')">
+                <div class="result-title">Overtime rate</div>
+                <div class="result-amount" id="overtimeAmount">$0.00</div>
+                <div class="result-formula" id="overtimeFormula">0.00 per-hour x 1.5</div>
+            </div>
+
+            <div class="result-card" onclick="showLaw('restDayRate')">
+                <div class="result-title">Rest Day rate</div>
+                <div class="result-amount" id="restDayAmount">$0.00</div>
+                <div class="result-formula" id="restDayFormula">0.00 per-day x 2</div>
+            </div>
+
+            <div class="result-card" onclick="showLaw('publicHolidayRate')">
+                <div class="result-title">Public Holiday rate</div>
+                <div class="result-amount" id="publicHolidayAmount">$0.00</div>
+                <div class="result-formula" id="publicHolidayFormula">(0.00 x 12 month) / (52 weeks x 5.50 days)</div>
+            </div>
+        </div>
+
+        <div class="disclaimer">
+            <p class="disclaimer-text">
+                The information provided by this application is for general guidance 
+                on subjects of interest only. These calculations apply only to 
+                Singapore labor laws. The application developer(s) disclaim 
+                all liability and responsibility arising from any reliance placed on 
+                such materials by any user, or by anyone who may be informed of any 
+                of its contents. The information is provided solely on the basis that 
+                users will be responsible for making their own assessment of it.
+            </p>
+        </div>
+    </div>
+    </div>
+
+    <div class="modal" id="lawModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="modalTitle">Title</h2>
+            </div>
+            <div class="modal-body">
+                <p class="modal-text" id="modalText">Text</p>
+                <a href="#" class="modal-link" id="modalLink" target="_blank">Link</a>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-button" onclick="closeModal()">CLOSE</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="helpModal">
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="modal-header">
+                <h2 class="modal-title">Help</h2>
+            </div>
+            <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
+                <h3 style="font-size: 16px; margin-bottom: 10px; color: #ff9800;">How to use this calculator</h3>
+                <p class="modal-text">
+                    1. Select whether you want to input your monthly or hourly salary<br>
+                    2. Enter your salary amount<br>
+                    3. Adjust days per week if needed (default is 5.5)<br>
+                    4. View calculated rates below<br>
+                    5. Tap any rate card to see the relevant Singapore Employment Act reference
+                </p>
+                
+                <h3 style="font-size: 16px; margin: 20px 0 10px 0; color: #ff9800;">Add to Home Screen</h3>
+                
+                <h4 style="font-size: 14px; margin: 15px 0 8px 0;">iPhone/iPad:</h4>
+                <p class="modal-text" style="margin-bottom: 15px;">
+                    1. Open Safari browser<br>
+                    2. Navigate to this app<br>
+                    3. Tap the Share button (square with arrow)<br>
+                    4. Scroll down and tap "Add to Home Screen"<br>
+                    5. Name it and tap "Add"
+                </p>
+                
+                <h4 style="font-size: 14px; margin: 15px 0 8px 0;">Android:</h4>
+                <p class="modal-text" style="margin-bottom: 15px;">
+                    1. Open Chrome browser<br>
+                    2. Navigate to this app<br>
+                    3. Tap the menu (3 dots) in top right<br>
+                    4. Tap "Add to Home screen"<br>
+                    5. Name it and tap "Add"
+                </p>
+                
+                <p class="modal-text" style="background-color: #f5f5f5; padding: 10px; border-radius: 4px; font-family: monospace; font-size: 12px; word-break: break-all;">
+                    App URL: <span id="appUrl"></span>
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-button" onclick="closeHelp()">CLOSE</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuration constants
+        const laws = {
+            dailyRate: {
+                title: 'Daily rate',
+                text: 'Employment Act (Chapter 91), Part VI, Section 107A (a)',
+                url: 'https://sso.agc.gov.sg/Act/EmPA1968?ProvIds=P1IV-#pr35-'
+            },
+            hourlyRate: {
+                title: 'Hourly rate',
+                text: 'Employment Act (Chapter 91), Fourth Schedule, Paragraph 1',
+                url: 'https://sso.agc.gov.sg/Act/EmPA1968?ProvIds=Sc4-#Sc4-'
+            },
+            overtimeRate: {
+                title: 'Overtime rate',
+                text: 'Employment Act (Chapter 91), Part IV, Section 38',
+                url: 'https://sso.agc.gov.sg/Act/EmPA1968?ProvIds=P1IV-#pr38-'
+            },
+            restDayRate: {
+                title: 'Rest Day rate',
+                text: 'Employment Act (Chapter 91), Part IV, Section 37',
+                url: 'https://sso.agc.gov.sg/Act/EmPA1968?ProvIds=P1IV-#pr37-'
+            },
+            publicHolidayRate: {
+                title: 'Public Holiday rate',
+                text: 'Employment Act (Chapter 91), Part IX, Section 88',
+                url: 'https://sso.agc.gov.sg/Act/EmPA1968?ProvIds=P1IX-#pr88-'
+            }
+        };
+
+        // Global variables
+        let monthlySalary = 0;
+        let daysPerWeek = 5.5;
+        let salaryType = 'monthly';
+        let daily = 0;
+        let hourly = 0;
+        let overTime = 0;
+        let restDay = 0;
+        let publicHoliday = 0;
+
+        // Calculate all values
+        function calculate() {
+            if (salaryType === 'monthly') {
+                // Input is monthly salary
+                daily = (monthlySalary * 12) / (52 * daysPerWeek);
+                hourly = (monthlySalary * 12) / (52 * 44);
+            } else {
+                // Input is hourly rate
+                hourly = monthlySalary; // monthlySalary variable now holds hourly rate
+                monthlySalary = (hourly * 52 * 44) / 12; // Calculate monthly from hourly
+                daily = (monthlySalary * 12) / (52 * daysPerWeek);
+            }
+            
+            overTime = hourly * 1.5;
+            restDay = daily * 2;
+            publicHoliday = daily;
+
+            // Update display
+            updateDisplay();
+        }
+
+        // Update all displayed values
+        function updateDisplay() {
+            if (salaryType === 'monthly') {
+                // Show hourly rate when input is monthly
+                document.getElementById('hourlyTitle').textContent = 'Hourly rate';
+                document.getElementById('hourlyAmount').textContent = '$' + hourly.toFixed(2);
+                document.getElementById('hourlyFormula').textContent = 
+                    `(${monthlySalary.toFixed(2)} x 12 month) / (52 weeks x 44 hours)`;
+            } else {
+                // Show monthly rate when input is hourly
+                document.getElementById('hourlyTitle').textContent = 'Monthly rate';
+                document.getElementById('hourlyAmount').textContent = '$' + monthlySalary.toFixed(2);
+                document.getElementById('hourlyFormula').textContent = 
+                    `(${hourly.toFixed(2)} x 52 weeks x 44 hours) / 12 month`;
+            }
+
+            // Update other amounts
+            document.getElementById('dailyAmount').textContent = '$' + daily.toFixed(2);
+            document.getElementById('overtimeAmount').textContent = '$' + overTime.toFixed(2);
+            document.getElementById('restDayAmount').textContent = '$' + restDay.toFixed(2);
+            document.getElementById('publicHolidayAmount').textContent = '$' + publicHoliday.toFixed(2);
+
+            // Update formulas
+            document.getElementById('dailyFormula').textContent = 
+                `(${monthlySalary.toFixed(2)} x 12 month) / (52 weeks x ${daysPerWeek.toFixed(2)} days)`;
+            document.getElementById('overtimeFormula').textContent = 
+                `${hourly.toFixed(2)} per-hour x 1.5`;
+            document.getElementById('restDayFormula').textContent = 
+                `${daily.toFixed(2)} per-day x 2`;
+            document.getElementById('publicHolidayFormula').textContent = 
+                `(${monthlySalary.toFixed(2)} x 12 month) / (52 weeks x ${daysPerWeek.toFixed(2)} days)`;
+        }
+
+        // Show law modal
+        function showLaw(lawType) {
+            const law = laws[lawType];
+            document.getElementById('modalTitle').textContent = law.title;
+            document.getElementById('modalText').textContent = law.text;
+            document.getElementById('modalLink').href = law.url;
+            document.getElementById('modalLink').textContent = 'reference';
+            document.getElementById('lawModal').style.display = 'block';
+        }
+
+        // Close modal
+        function closeModal() {
+            document.getElementById('lawModal').style.display = 'none';
+        }
+
+        // Show help modal
+        function showHelp() {
+            document.getElementById('appUrl').textContent = window.location.href;
+            document.getElementById('helpModal').style.display = 'block';
+        }
+
+        // Close help modal
+        function closeHelp() {
+            document.getElementById('helpModal').style.display = 'none';
+        }
+
+        // Input validation - only allow numbers and decimal point with max 4 digits + 2 decimals
+        function validateInput(input) {
+            // Remove any non-numeric characters except decimal point
+            let value = input.replace(/[^0-9.]/g, '');
+            
+            // Ensure only one decimal point
+            const parts = value.split('.');
+            if (parts.length > 2) {
+                value = parts[0] + '.' + parts.slice(1).join('');
+            }
+            
+            // Limit to 4 digits before decimal and 2 after
+            if (parts.length === 2) {
+                const integerPart = parts[0].slice(0, 4);
+                const decimalPart = parts[1].slice(0, 2);
+                value = integerPart + '.' + decimalPart;
+            } else {
+                value = value.slice(0, 4);
+            }
+            
+            return value;
+        }
+
+        // Setup event listeners
+        document.getElementById('salaryType').addEventListener('change', function(e) {
+            salaryType = e.target.value;
+            // Reset input when switching types
+            document.getElementById('salaryInput').value = '';
+            monthlySalary = 0;
+            calculate();
+        });
+
+        document.getElementById('salaryInput').addEventListener('input', function(e) {
+            const validatedValue = validateInput(e.target.value);
+            e.target.value = validatedValue;
+            
+            monthlySalary = validatedValue === '' ? 0 : parseFloat(validatedValue) || 0;
+            calculate();
+        });
+
+        document.getElementById('daysInput').addEventListener('input', function(e) {
+            const validatedValue = validateInput(e.target.value);
+            e.target.value = validatedValue;
+            
+            const newValue = validatedValue === '' ? 0 : parseFloat(validatedValue) || 0;
+            if (newValue > 0) {
+                daysPerWeek = newValue;
+                calculate();
+            }
+        });
+
+        // Close modal when clicking outside
+        document.getElementById('lawModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+
+        // Close help modal when clicking outside
+        document.getElementById('helpModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeHelp();
+            }
+        });
+
+        // Initialize display
+        calculate();
+    </script>
+</body>
+</html>
