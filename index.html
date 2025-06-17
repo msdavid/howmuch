@@ -561,11 +561,12 @@
         };
 
         // Global variables
-        let monthlySalary = 0;
+        let inputValue = 0;  // Stores the current input value (either monthly or hourly)
         let daysPerWeek = 5.5;
         let salaryType = 'monthly';
         let daily = 0;
         let hourly = 0;
+        let monthlySalary = 0;  // Always stores the calculated monthly salary
         let overTime = 0;
         let restDay = 0;
         let publicHoliday = 0;
@@ -574,12 +575,13 @@
         function calculate() {
             if (salaryType === 'monthly') {
                 // Input is monthly salary
-                daily = (monthlySalary * 12) / (52 * daysPerWeek);
+                monthlySalary = inputValue;
                 hourly = (monthlySalary * 12) / (52 * 44);
+                daily = (monthlySalary * 12) / (52 * daysPerWeek);
             } else {
                 // Input is hourly rate
-                hourly = monthlySalary; // monthlySalary variable now holds hourly rate
-                monthlySalary = (hourly * 52 * 44) / 12; // Calculate monthly from hourly
+                hourly = inputValue;
+                monthlySalary = (hourly * 52 * 44) / 12;
                 daily = (monthlySalary * 12) / (52 * daysPerWeek);
             }
             
@@ -678,7 +680,7 @@
             salaryType = e.target.value;
             // Reset input when switching types
             document.getElementById('salaryInput').value = '';
-            monthlySalary = 0;
+            inputValue = 0;
             calculate();
         });
 
@@ -686,7 +688,7 @@
             const validatedValue = validateInput(e.target.value);
             e.target.value = validatedValue;
             
-            monthlySalary = validatedValue === '' ? 0 : parseFloat(validatedValue) || 0;
+            inputValue = validatedValue === '' ? 0 : parseFloat(validatedValue) || 0;
             calculate();
         });
 
