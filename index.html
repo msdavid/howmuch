@@ -2,9 +2,12 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="theme-color" content="#ffa726">
     <title>How Much</title>
     <style>
         * {
@@ -23,6 +26,11 @@
             justify-content: center;
             align-items: center;
             padding: 0;
+            -webkit-text-size-adjust: 100%;
+            -ms-text-size-adjust: 100%;
+            text-size-adjust: 100%;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
         }
 
         .app-container {
@@ -49,9 +57,10 @@
         }
 
         .app-bar {
-            background-color: #ff9800;
+            background: linear-gradient(135deg, #ffa726 0%, #f4511e 100%);
             color: white;
             padding: 12px 16px;
+            padding-top: max(12px, env(safe-area-inset-top));
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             flex-shrink: 0;
             display: flex;
@@ -114,12 +123,20 @@
         .salary-dropdown {
             flex: 1;
             padding: 8px;
-            font-size: 14px;
+            font-size: 16px;
             color: #333;
             border: none;
             background-color: transparent;
             outline: none;
             cursor: pointer;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 8px center;
+            background-size: 20px;
+            padding-right: 35px;
         }
 
         .fixed-label {
@@ -136,7 +153,7 @@
         }
 
         .input-field {
-            width: 90px;
+            width: 110px;
             flex: none;
             padding: 8px;
             font-size: 20px;
@@ -144,10 +161,36 @@
             text-align: right;
             outline: none;
             background-color: transparent;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            border-radius: 0;
+        }
+
+        #salaryInput {
+            font-size: 24px;
+            width: 130px;
+        }
+
+        /* Prevent iOS zoom on input focus */
+        @supports (-webkit-touch-callout: none) {
+            .input-field {
+                font-size: 16px;
+            }
+            #salaryInput {
+                font-size: 20px;
+            }
+            .salary-dropdown {
+                font-size: 16px;
+            }
         }
 
         .input-field:focus {
             background-color: #f5f5f5;
+        }
+
+        .input-field::placeholder {
+            color: rgba(0, 0, 0, 0.2);
         }
 
         .divider {
@@ -162,6 +205,8 @@
             flex: 1 1 0;
             overflow-y: auto;
             min-height: 0;
+            -webkit-overflow-scrolling: touch;
+            overscroll-behavior: contain;
         }
 
         .result-card {
@@ -201,6 +246,7 @@
 
         .disclaimer {
             padding: 10px 16px;
+            padding-bottom: max(10px, env(safe-area-inset-bottom));
             text-align: center;
             flex-shrink: 0;
             background-color: #f5f5f5;
@@ -312,6 +358,12 @@
                 font-size: 18px;
                 padding: 6px;
             }
+            #salaryInput {
+                font-size: 20px;
+            }
+            .salary-dropdown {
+                font-size: 14px;
+            }
             .result-card {
                 padding: 8px 16px;
             }
@@ -355,7 +407,7 @@
                        placeholder="0" 
                        inputmode="decimal"
                        pattern="[0-9]*\.?[0-9]*"
-                       maxlength="7">
+                       maxlength="8">
             </div>
             <div class="input-group">
                 <label class="input-label">Days per Week</label>
@@ -597,7 +649,7 @@
             document.getElementById('helpModal').style.display = 'none';
         }
 
-        // Input validation - only allow numbers and decimal point with max 4 digits + 2 decimals
+        // Input validation - only allow numbers and decimal point with max 5 digits + 2 decimals
         function validateInput(input) {
             // Remove any non-numeric characters except decimal point
             let value = input.replace(/[^0-9.]/g, '');
@@ -608,13 +660,13 @@
                 value = parts[0] + '.' + parts.slice(1).join('');
             }
             
-            // Limit to 4 digits before decimal and 2 after
+            // Limit to 5 digits before decimal and 2 after
             if (parts.length === 2) {
-                const integerPart = parts[0].slice(0, 4);
+                const integerPart = parts[0].slice(0, 5);
                 const decimalPart = parts[1].slice(0, 2);
                 value = integerPart + '.' + decimalPart;
             } else {
-                value = value.slice(0, 4);
+                value = value.slice(0, 5);
             }
             
             return value;
