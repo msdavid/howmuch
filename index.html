@@ -599,13 +599,14 @@
                 // Input is monthly salary
                 monthlySalary = inputValue;
                 daily = (monthlySalary * 12) / (52 * daysPerWeek);
-                hourly = daily / 8; // Assuming 8-hour workday
             } else {
                 // Input is daily rate
                 daily = inputValue;
                 monthlySalary = (daily * 52 * daysPerWeek) / 12;
-                hourly = daily / 8; // Assuming 8-hour workday
             }
+            
+            // Hourly rate is always calculated from monthly salary
+            hourly = (monthlySalary * 12) / (52 * 44);
             
             overTime = hourly * 1.5;
             restDay = daily * 2;
@@ -643,7 +644,7 @@
 
             // Update formulas
             document.getElementById('hourlyFormula').textContent = 
-                `${daily.toFixed(2)} per-day / 8 hours`;
+                `(${monthlySalary.toFixed(2)} x 12 month) / (52 weeks x 44 hours)`;
             document.getElementById('overtimeFormula').textContent = 
                 `${hourly.toFixed(2)} per-hour x 1.5`;
             document.getElementById('restDayFormula').textContent = 
