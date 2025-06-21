@@ -138,6 +138,14 @@
             background-position: right 8px center;
             background-size: 20px;
             padding-right: 35px;
+            text-align: right;
+            text-align-last: right;
+            direction: rtl;
+        }
+        
+        .salary-dropdown option {
+            direction: ltr;
+            text-align: right;
         }
 
         .fixed-label {
@@ -398,9 +406,9 @@
         <div class="content">
         <div class="input-section">
             <div class="salary-input-group">
-                <select class="salary-dropdown" id="salaryType">
+                <select class="salary-dropdown" id="salaryType" style="text-align: left; text-align-last: left; direction: ltr;">
                     <option value="monthly">Basic monthly salary</option>
-                    <option value="hourly">Basic hourly salary</option>
+                    <option value="daily">Daily Basic Rate</option>
                 </select>
                 <input type="text" 
                        class="input-field" 
@@ -412,23 +420,32 @@
             </div>
             <div class="input-group">
                 <label class="input-label">Days per Week</label>
-                <input type="text" 
-                       class="input-field" 
-                       id="daysInput" 
-                       value="5.5" 
-                       inputmode="decimal"
-                       pattern="[0-9]*\.?[0-9]*"
-                       maxlength="7">
+                <div id="daysContainer" style="display: flex; align-items: center; width: 110px; flex: none;">
+                    <select class="salary-dropdown" id="daysDropdown" style="width: 100%; display: block;">
+                        <option value="6">6</option>
+                        <option value="5.5">5.5</option>
+                        <option value="5">5</option>
+                        <option value="custom">Custom</option>
+                    </select>
+                    <input type="text" 
+                           class="input-field" 
+                           id="daysInput" 
+                           placeholder="1-7"
+                           inputmode="decimal"
+                           pattern="[0-9]*\.?[0-9]*"
+                           maxlength="3"
+                           style="width: 100%; display: none;">
+                </div>
             </div>
         </div>
 
         <div class="divider"></div>
 
         <div class="results-section">
-            <div class="result-card" onclick="showLaw('dailyRate')">
-                <div class="result-title">Daily rate</div>
-                <div class="result-amount" id="dailyAmount">$0.00</div>
-                <div class="result-formula" id="dailyFormula">(0.00 x 12 month) / (52 weeks x 5.50 days)</div>
+            <div class="result-card" id="monthlyCard" onclick="">
+                <div class="result-title" id="monthlyTitle">Monthly rate</div>
+                <div class="result-amount" id="monthlyAmount">$0.00</div>
+                <div class="result-formula" id="monthlyFormula">(0.00 x 52 weeks x 6.00 days) / 12 month</div>
             </div>
 
             <div class="result-card" onclick="showLaw('hourlyRate')">
@@ -452,7 +469,7 @@
             <div class="result-card" onclick="showLaw('publicHolidayRate')">
                 <div class="result-title">Public Holiday rate</div>
                 <div class="result-amount" id="publicHolidayAmount">$0.00</div>
-                <div class="result-formula" id="publicHolidayFormula">(0.00 x 12 month) / (52 weeks x 5.50 days)</div>
+                <div class="result-formula" id="publicHolidayFormula">(0.00 x 12 month) / (52 weeks x 6.00 days)</div>
             </div>
         </div>
 
@@ -495,7 +512,7 @@
                 <p class="modal-text">
                     1. Select whether you want to input your monthly or hourly salary<br>
                     2. Enter your salary amount<br>
-                    3. Adjust days per week if needed (default is 5.5)<br>
+                    3. Adjust days per week if needed (default is 6)<br>
                     4. View calculated rates below<br>
                     5. Tap any rate card to see the relevant Singapore Employment Act reference
                 </p>
@@ -533,36 +550,41 @@
     <script>
         // Configuration constants
         const laws = {
+            monthlyRate: {
+                title: 'Monthly rate',
+                text: 'Employment Act (Chapter 91), Part III, Section 19',
+                url: 'https://sso.agc.gov.sg/Act/EmPA1968?ProvIds=P1III-#pr19-'
+            },
             dailyRate: {
                 title: 'Daily rate',
                 text: 'Employment Act (Chapter 91), Part VI, Section 107A (a)',
-                url: 'https://sso.agc.gov.sg/Act/EmPA1968?ProvIds=P1IV-#pr35-'
+                url: 'https://sso.agc.gov.sg/act/ema1968?ProvIds=P114-#pr107A-'
             },
             hourlyRate: {
                 title: 'Hourly rate',
                 text: 'Employment Act (Chapter 91), Fourth Schedule, Paragraph 1',
-                url: 'https://sso.agc.gov.sg/Act/EmPA1968?ProvIds=Sc4-#Sc4-'
+                url: 'https://sso.agc.gov.sg/act/ema1968?ProvIds=Sc4-#Sc4-'
             },
             overtimeRate: {
                 title: 'Overtime rate',
                 text: 'Employment Act (Chapter 91), Part IV, Section 38',
-                url: 'https://sso.agc.gov.sg/Act/EmPA1968?ProvIds=P1IV-#pr38-'
+                url: 'https://sso.agc.gov.sg/act/ema1968?ProvIds=P14-#pr38-'
             },
             restDayRate: {
                 title: 'Rest Day rate',
                 text: 'Employment Act (Chapter 91), Part IV, Section 37',
-                url: 'https://sso.agc.gov.sg/Act/EmPA1968?ProvIds=P1IV-#pr37-'
+                url: 'https://sso.agc.gov.sg/act/ema1968?ProvIds=P14-#pr37-'
             },
             publicHolidayRate: {
                 title: 'Public Holiday rate',
-                text: 'Employment Act (Chapter 91), Part IX, Section 88',
-                url: 'https://sso.agc.gov.sg/Act/EmPA1968?ProvIds=P1IX-#pr88-'
+                text: 'https://sso.agc.gov.sg/act/ema1968?ProvIds=P110-#pr88-',
+                url: ''
             }
         };
 
         // Global variables
-        let inputValue = 0;  // Stores the current input value (either monthly or hourly)
-        let daysPerWeek = 5.5;
+        let inputValue = 0;  // Stores the current input value (either monthly or daily)
+        let daysPerWeek = 6;
         let salaryType = 'monthly';
         let daily = 0;
         let hourly = 0;
@@ -576,13 +598,13 @@
             if (salaryType === 'monthly') {
                 // Input is monthly salary
                 monthlySalary = inputValue;
-                hourly = (monthlySalary * 12) / (52 * 44);
                 daily = (monthlySalary * 12) / (52 * daysPerWeek);
+                hourly = daily / 8; // Assuming 8-hour workday
             } else {
-                // Input is hourly rate
-                hourly = inputValue;
-                monthlySalary = (hourly * 52 * 44) / 12;
-                daily = (monthlySalary * 12) / (52 * daysPerWeek);
+                // Input is daily rate
+                daily = inputValue;
+                monthlySalary = (daily * 52 * daysPerWeek) / 12;
+                hourly = daily / 8; // Assuming 8-hour workday
             }
             
             overTime = hourly * 1.5;
@@ -595,35 +617,39 @@
 
         // Update all displayed values
         function updateDisplay() {
+            const monthlyCard = document.getElementById('monthlyCard');
+            
             if (salaryType === 'monthly') {
-                // Show hourly rate when input is monthly
-                document.getElementById('hourlyTitle').textContent = 'Hourly rate';
-                document.getElementById('hourlyAmount').textContent = '$' + hourly.toFixed(2);
-                document.getElementById('hourlyFormula').textContent = 
-                    `(${monthlySalary.toFixed(2)} x 12 month) / (52 weeks x 44 hours)`;
+                // Show daily rate when input is monthly
+                document.getElementById('monthlyTitle').textContent = 'Daily rate';
+                document.getElementById('monthlyAmount').textContent = '$' + daily.toFixed(2);
+                document.getElementById('monthlyFormula').textContent = 
+                    `(${monthlySalary.toFixed(2)} x 12 month) / (52 weeks x ${daysPerWeek.toFixed(2)} days)`;
+                monthlyCard.onclick = function() { showLaw('dailyRate'); };
             } else {
-                // Show monthly rate when input is hourly
-                document.getElementById('hourlyTitle').textContent = 'Monthly rate';
-                document.getElementById('hourlyAmount').textContent = '$' + monthlySalary.toFixed(2);
-                document.getElementById('hourlyFormula').textContent = 
-                    `(${hourly.toFixed(2)} x 52 weeks x 44 hours) / 12 month`;
+                // Show monthly rate when input is daily
+                document.getElementById('monthlyTitle').textContent = 'Monthly rate';
+                document.getElementById('monthlyAmount').textContent = '$' + monthlySalary.toFixed(2);
+                document.getElementById('monthlyFormula').textContent = 
+                    `(${daily.toFixed(2)} x 52 weeks x ${daysPerWeek.toFixed(2)} days) / 12 month`;
+                monthlyCard.onclick = function() { showLaw('monthlyRate'); };
             }
 
             // Update other amounts
-            document.getElementById('dailyAmount').textContent = '$' + daily.toFixed(2);
+            document.getElementById('hourlyAmount').textContent = '$' + hourly.toFixed(2);
             document.getElementById('overtimeAmount').textContent = '$' + overTime.toFixed(2);
             document.getElementById('restDayAmount').textContent = '$' + restDay.toFixed(2);
             document.getElementById('publicHolidayAmount').textContent = '$' + publicHoliday.toFixed(2);
 
             // Update formulas
-            document.getElementById('dailyFormula').textContent = 
-                `(${monthlySalary.toFixed(2)} x 12 month) / (52 weeks x ${daysPerWeek.toFixed(2)} days)`;
+            document.getElementById('hourlyFormula').textContent = 
+                `${daily.toFixed(2)} per-day / 8 hours`;
             document.getElementById('overtimeFormula').textContent = 
                 `${hourly.toFixed(2)} per-hour x 1.5`;
             document.getElementById('restDayFormula').textContent = 
                 `${daily.toFixed(2)} per-day x 2`;
             document.getElementById('publicHolidayFormula').textContent = 
-                `(${monthlySalary.toFixed(2)} x 12 month) / (52 weeks x ${daysPerWeek.toFixed(2)} days)`;
+                `${daily.toFixed(2)} per-day`;
         }
 
         // Show law modal
@@ -692,13 +718,77 @@
             calculate();
         });
 
-        document.getElementById('daysInput').addEventListener('input', function(e) {
-            const validatedValue = validateInput(e.target.value);
-            e.target.value = validatedValue;
+        // Days per week dropdown handler
+        document.getElementById('daysDropdown').addEventListener('change', function(e) {
+            const dropdown = e.target;
+            const input = document.getElementById('daysInput');
             
-            const newValue = validatedValue === '' ? 0 : parseFloat(validatedValue) || 0;
-            if (newValue > 0) {
-                daysPerWeek = newValue;
+            if (dropdown.value === 'custom') {
+                // Switch to input mode
+                dropdown.style.display = 'none';
+                input.style.display = 'block';
+                input.value = daysPerWeek.toString();
+                input.focus();
+            } else {
+                // Use dropdown value
+                daysPerWeek = parseFloat(dropdown.value);
+                calculate();
+            }
+        });
+
+        // Custom days input handler
+        document.getElementById('daysInput').addEventListener('input', function(e) {
+            let value = e.target.value;
+            
+            // Remove any non-numeric characters except decimal point
+            value = value.replace(/[^0-9.]/g, '');
+            
+            // Ensure only one decimal point
+            const parts = value.split('.');
+            if (parts.length > 2) {
+                value = parts[0] + '.' + parts.slice(1).join('');
+            }
+            
+            // Limit to one decimal place
+            if (parts.length === 2) {
+                value = parts[0] + '.' + parts[1].slice(0, 1);
+            }
+            
+            // Ensure value is between 1 and 7
+            const numValue = parseFloat(value);
+            if (numValue > 7) {
+                value = '7';
+            }
+            
+            e.target.value = value;
+            
+            // Update calculation if valid
+            if (numValue >= 1 && numValue <= 7) {
+                daysPerWeek = numValue;
+                calculate();
+            }
+        });
+
+        // Handle blur event to switch back to dropdown if needed
+        document.getElementById('daysInput').addEventListener('blur', function(e) {
+            const input = e.target;
+            const dropdown = document.getElementById('daysDropdown');
+            const value = parseFloat(input.value);
+            
+            // If value matches a dropdown option, switch back to dropdown
+            if (value === 6 || value === 5.5 || value === 5) {
+                dropdown.value = value.toString();
+                dropdown.style.display = 'block';
+                input.style.display = 'none';
+            } else if (value >= 1 && value <= 7) {
+                // Keep custom value
+                daysPerWeek = value;
+            } else {
+                // Invalid value, revert to dropdown with default
+                dropdown.value = '6';
+                dropdown.style.display = 'block';
+                input.style.display = 'none';
+                daysPerWeek = 6;
                 calculate();
             }
         });
